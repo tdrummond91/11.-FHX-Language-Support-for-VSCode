@@ -1,6 +1,6 @@
-{
-  "name": "fhx",
-  "displayName": "fhx",
+{                       
+  "name": "fhx-language",
+  "displayName": "FHX Language Support",
   "description": "FHX Configuration File",
   "version": "0.0.1",
   "engines": {
