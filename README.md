@@ -17,6 +17,8 @@ vsce --version
 vsce package
 
 ## Installation of Extension
+code --install-extension <file_path>.vsix
+# Example
 code --install-extension fhx-language-0.0.1.vsix
 
 ## License

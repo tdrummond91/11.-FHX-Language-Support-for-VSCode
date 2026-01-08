@@ -3,6 +3,8 @@
 	"name": "fhx",
 	"scopeName": "source.fhx",
 	"patterns": [
+		{ "include": "#meta_data" },
+		{ "include": "#module_instances" },
 		{ "include": "#blocks" },
 		{ "include": "#keywords" },
 		{ "include": "#assignments" },
@@ -23,19 +25,19 @@
 		"patterns": [
 			{
 			"name": "keyword.control.fhx",
-			"match": "\\b(SCHEMA|LOCALE|ATTRIBUTE_INSTANCE|VALUE)\\b"
+			"match": "\\b(SCHEMA|LOCALE|ATTRIBUTE_INSTANCE|VALUE|FUNCTION_BLOCK|ATTRIBUTE|FBD_ALGORITHM|WIRE)\\b"
 			}
 		]
 		},
 		"assignments": {
 		"patterns": [
 			{
-			"name": "variable.other.assignment.fhx",
-			"match": "\\b[A-Z0-9_/]+(?=\\=)"
+				"name": "variable.other.assignment.fhx",
+				"match": "\\b[A-Z0-9_/]+(?=\\s*=)"
 			},
 			{
-			"name": "keyword.operator.assignment.fhx",
-			"match": "="
+				"name": "keyword.operator.assignment.fhx",
+				"match": "\\s*=\\s?"
 			}
 		]
 		},
@@ -60,9 +62,25 @@
 		"patterns": [
 			{
 			"name": "constant.language.boolean.fhx",
-			"match": "\\b(T|F)\\b"
+			"match": "\\b(T|F|NONE)\\b"
+			}
+		]
+		},
+		"module_instances": {
+		"patterns": [
+			{
+			"name": "entity.name.class",
+			"match": "^\\bMODULE_INSTANCE\\b|^\\bMODULE\\b"
+			}
+		]
+		},
+		"meta_data": {
+		"patterns": [
+			{
+			"name": "variable.other.constant",
+			"match": "user=|time="
 			}
 		]
 		}
 	}
-	}
+}

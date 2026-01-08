@@ -1,5 +1,6 @@
 {                       
   "name": "fhx-language",
+  "publisher": "tdrummond",
   "displayName": "FHX Language Support",
   "description": "FHX Configuration File",
   "version": "0.0.1",
