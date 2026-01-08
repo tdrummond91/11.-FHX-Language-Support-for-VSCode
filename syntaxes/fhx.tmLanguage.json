@@ -1,0 +1,68 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "fhx",
+	"scopeName": "source.fhx",
+	"patterns": [
+		{ "include": "#blocks" },
+		{ "include": "#keywords" },
+		{ "include": "#assignments" },
+		{ "include": "#strings" },
+		{ "include": "#numbers" },
+		{ "include": "#booleans" }
+	],
+	"repository": {
+		"blocks": {
+		"patterns": [
+			{
+			"name": "punctuation.section.block.fhx",
+			"match": "[{}]"
+			}
+		]
+		},
+		"keywords": {
+		"patterns": [
+			{
+			"name": "keyword.control.fhx",
+			"match": "\\b(SCHEMA|LOCALE|ATTRIBUTE_INSTANCE|VALUE)\\b"
+			}
+		]
+		},
+		"assignments": {
+		"patterns": [
+			{
+			"name": "variable.other.assignment.fhx",
+			"match": "\\b[A-Z0-9_/]+(?=\\=)"
+			},
+			{
+			"name": "keyword.operator.assignment.fhx",
+			"match": "="
+			}
+		]
+		},
+		"strings": {
+		"patterns": [
+			{
+			"name": "string.quoted.double.fhx",
+			"begin": "\"",
+			"end": "\""
+			}
+		]
+		},
+		"numbers": {
+		"patterns": [
+			{
+			"name": "constant.numeric.fhx",
+			"match": "\\b\\d+\\b"
+			}
+		]
+		},
+		"booleans": {
+		"patterns": [
+			{
+			"name": "constant.language.boolean.fhx",
+			"match": "\\b(T|F)\\b"
+			}
+		]
+		}
+	}
+	}
