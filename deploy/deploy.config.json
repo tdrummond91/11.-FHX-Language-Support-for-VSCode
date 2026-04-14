@@ -1,0 +1,14 @@
+{
+  "project_id": "fhx-syntax-highlighting",
+  "description": "FHX syntax highlighting and language support for VS Code",
+  "root": "..",
+  "deploy_from": "",
+  "destinations": [
+    "\\\\10.115.200.250\\Dropbox\\Utilities\\Advanced Utilities - Drummond\\02. VS Code Extensions\\FHX Syntax Highlighting"
+  ],
+  "dry_run": false,
+  "files": [
+    "docs/",
+    "*.vsix"
+  ]
+}

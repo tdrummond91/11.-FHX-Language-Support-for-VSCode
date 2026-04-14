@@ -1,0 +1,26 @@
+{                       
+  "name": "fhx-language",
+  "publisher": "tdrummond",
+  "displayName": "FHX Language Support",
+  "description": "FHX Configuration File",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.107.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "fhx",
+      "aliases": ["fhx", "fhx"],
+      "extensions": [".fhx", ".FHX"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "fhx",
+      "scopeName": "source.fhx",
+      "path": "./syntaxes/fhx.tmLanguage.json"
+    }]
+  }
+}
