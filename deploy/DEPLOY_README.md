@@ -50,12 +50,19 @@ deploy\deploy.bat --dry-run                          # preview only
 deploy\deploy.bat --verbose                          # show every file operation
 deploy\deploy.bat --config deploy\prod.config.json   # alternate config
 deploy\deploy.bat --init                             # scaffold deploy folder
+deploy\deploy.bat --update                           # update deploy docs only
 ```
 
 On Git Bash or Linux: `./deploy/deploy.sh` (same flags apply).
 
 `--dry-run` can also be set in the config (`"dry_run": true`).
 The CLI flag always wins if both are set.
+
+### Auto-update of deploy docs
+
+Every time `deploy.py` runs a deploy, it automatically updates the project's
+`deploy/` folder with the latest `DEPLOY_README.md` and adds any missing config
+fields. Use `--update` to do just this step without deploying.
 
 ---
 
@@ -77,6 +84,10 @@ The CLI flag always wins if both are set.
     "*.exe",
     "_internal/",
     "readme.md"
+  ],
+  "hidden_patterns": [
+    "*.exe",
+    "_internal/"
   ]
 }
 ```
@@ -87,12 +98,14 @@ The CLI flag always wins if both are set.
 |---|---|---|---|
 | `project_id` | `string` | **Yes** | Stable identity slug for this project (e.g., `"olin-custom-utilities"`). Written into `deploy_log.json` so the client updater can match projects by ID even if folder names change. |
 | `description` | `string` | No | Short description shown to users in the Utilities Manager dashboard. Recommend keeping under 80 characters. |
+| `project_type` | `string` | No | How the Utilities Manager client should treat the project. Empty/unset or `"sync"` (default) = live-tool sync, files live under `~\Advanced Utilities - Drummond\<project>\`. `"installer"` = one-shot setup: client stages files to `%TEMP%`, auto-runs `install.bat`, writes an install receipt on success, deletes the staging folder. Use `installer` for projects that install external software (e.g., VS Code) rather than files the user runs directly. |
 | `root` | `string` | No | Project root, relative to config file location. Defaults to the config file's parent directory. |
 | `deploy_from` | `string` | No | Subfolder within `root` to use as the base for file resolution and relative paths at the destination. Leave empty `""` or omit to use `root`. Example: `"dist/Olin Custom Utilities"` means files resolve from that subfolder and land at the destination root — the `dist/Olin Custom Utilities` prefix is stripped. |
 | `destinations` | `string[]` | Yes* | List of target paths. UNC paths (`\\server\share\...`) work natively on Windows. |
 | `destination` | `string` | Yes* | Shorthand — single target path. Use `destinations` for multiple. |
 | `dry_run` | `boolean` | No | If `true`, preview only. CLI `--dry-run` flag overrides this. Default: `false`. |
 | `files` | `string[]` | Yes | Whitelist of files/patterns to deploy. Paths are relative to `deploy_from` (or `root` if `deploy_from` is not set). |
+| `hidden_patterns` | `string[]` | No | Patterns whose matching files/folders get the Windows **Hidden** attribute at the destination (end users won't see them in Explorer). Any entry here is **automatically deployed** — no need to duplicate it in `files`. If a pattern is later removed from this list, the next deploy will clear the Hidden attribute from paths that were hidden previously but no longer match. |
 
 *One of `destination` or `destinations` is required. If both are present, `destinations` is used.
 
@@ -108,6 +121,21 @@ The CLI flag always wins if both are set.
 | `_internal/` | Entire folder, recursively |
 
 All paths are relative to `deploy_from`.
+
+### Hidden pattern forms
+
+`hidden_patterns` uses the same glob syntax as `files`, plus two folder forms
+that differ in scope:
+
+| Pattern | Behaviour |
+|---|---|
+| `*.exe` | Hide matching files only; their containing folders stay visible |
+| `config/*` | Hide every file directly inside `config/`; the `config/` folder itself stays visible |
+| `config/` | Hide the `config/` folder itself **and** all of its contents recursively |
+
+Pick the form that matches what end users should see in Explorer at the
+destination. A trailing slash means "hide the folder too"; no trailing slash
+(with `*`) means "hide just the contents."
 
 ### Example configs
 
@@ -145,6 +173,27 @@ All paths are relative to `deploy_from`.
 }
 ```
 
+**User-facing installer with hidden internals** (only README and launcher
+visible to end users; everything else is deployed but hidden; the Utilities
+Manager client auto-runs `install.bat` and cleans up the staging folder on
+success):
+```json
+{
+  "project_id": "vs-code-installer",
+  "project_type": "installer",
+  "root": "..",
+  "destinations": ["\\\\10.115.200.250\\Dropbox\\Utilities\\VS Code Installer"],
+  "files": ["README.md", "install.bat"],
+  "hidden_patterns": ["*.exe", "vsix/", "install.ps1", "config/"]
+}
+```
+Notes:
+- `*.exe`, `vsix/`, `install.ps1`, and `config/` are **not** in `files` — entries
+  in `hidden_patterns` are auto-deployed.
+- `project_type: "installer"` tells the Utilities Manager client to stage the
+  files to `%TEMP%`, run `install.bat`, and record the installed version in a
+  receipt rather than leaving files in the user's Advanced Utilities folder.
+
 ---
 
 ## Deploy Log
@@ -158,10 +207,12 @@ A `deploy_log.json` is written to each destination after every run. It records:
 - **Current HEAD commit** — short hash, long hash, tags, cleaned message
 - **Up to 2 previous tagged commits** matching `v*`, `release-*`, or `deploy-*`
   patterns (Co-Authored-By trailers stripped automatically)
-- **`files_copied`** — files that were new or changed
-- **`files_skipped`** — files unchanged (byte-identical)
+- **`all_files`** — complete manifest of every file that should exist at the destination (the client updater uses this to know what to copy locally)
+- **`files_copied`** — files that were new or changed this deploy
+- **`files_skipped`** — files unchanged (same size, already at destination)
 - **`files_removed`** — files that were in the previous deploy but no longer in source
 - **`files_failed`** — files that failed to copy
+- **`files_hidden`** — paths currently carrying the Hidden attribute because they matched `hidden_patterns`. Used on the next deploy to detect patterns that were removed and clear Hidden from paths that no longer match.
 - Rolling history of the last 20 deploy entries
 
 ### Example log snippet

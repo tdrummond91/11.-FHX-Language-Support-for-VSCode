@@ -10,5 +10,7 @@
   "files": [
     "docs/",
     "*.vsix"
-  ]
+  ],
+  "project_type": "",
+  "hidden_patterns": []
 }
